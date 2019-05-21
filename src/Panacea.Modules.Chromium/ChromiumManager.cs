@@ -70,7 +70,7 @@ namespace Panacea.Modules.Chromium
             settings.CefCommandLineArgs.Add("--disable-smart-virtual-keyboard", "1");
             settings.CefCommandLineArgs.Add("--disable-virtual-keyboard", "1");
             settings.CefCommandLineArgs.Add("enable-media-stream", "1");
-            settings.CefCommandLineArgs.Add("--ignore-certificate-errors", "1");
+            //settings.CefCommandLineArgs.Add("--ignore-certificate-errors", "1");
             //settings.CefCommandLineArgs.Add("--kiosk", "1");
             //settings.CefCommandLineArgs.Add("--kiosk-noprint", "1");
             //settings.FocusedNodeChangedEnabled = true;
