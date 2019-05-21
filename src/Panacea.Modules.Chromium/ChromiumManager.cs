@@ -23,7 +23,7 @@ namespace Panacea.Modules.Chromium
         {
             Initialize();
             if (url == null) url = "about:blank";
-            return new ChromiumWebView("https://google.com");
+            return new ChromiumWebView(url);
         }
 
         bool _initialized;
