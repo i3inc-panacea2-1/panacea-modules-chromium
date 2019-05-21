@@ -262,16 +262,29 @@ namespace Panacea.Modules.Chromium
             set { SetValue(TitleProperty, value); }
         }
 
+        bool _isBusy;
         public bool IsBusy
         {
-            get { return (bool)GetValue(IsBusyProperty); }
-            set { SetValue(IsBusyProperty, value); }
+            get => _isBusy;
+            private set
+            {
+                _isBusy = value;
+                IsBusyChanged?.Invoke(this, value);
+            }
         }
 
-        // Using a DependencyProperty as the backing store for IsBust.  This enables animation, styling, binding, etc...
-        public static readonly DependencyProperty IsBusyProperty =
-            DependencyProperty.Register("IsBusy", typeof(bool), typeof(ChromiumWebView), new PropertyMetadata(false));
+        bool _hasInvalidCertificate;
+        public bool HasInvalidCertificate
+        {
+            get => _hasInvalidCertificate;
+            private set
+            {
+                _hasInvalidCertificate = value;
+                HasInvalidCertificateChanged?.Invoke(this, value);
+            }
+        }
 
+        public event EventHandler<bool> HasInvalidCertificateChanged;
 
         public string Url
         {
@@ -381,6 +394,7 @@ namespace Panacea.Modules.Chromium
 
         public bool OnCertificateError(IWebBrowser browserControl, IBrowser browser, CefErrorCode errorCode, string requestUrl, ISslInfo sslInfo, IRequestCallback callback)
         {
+            HasInvalidCertificate = true;
             if (!callback.IsDisposed)
             {
                 using (callback)
@@ -673,6 +687,7 @@ namespace Panacea.Modules.Chromium
         public bool OnBeforeBrowse(IWebBrowser browserControl, IBrowser browser, IFrame frame, IRequest request, bool userGesture, bool isRedirect)
         {
             if (_disposed) return false;
+            HasInvalidCertificate = false;
             Browser.ExecuteScriptAsync("window.print = function(){}");
             Dispatcher.BeginInvoke(new Action(() =>
             {
