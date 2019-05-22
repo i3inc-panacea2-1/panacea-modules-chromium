@@ -1,0 +1,20 @@
+﻿[
+  "d3d11-video-decoder@1",
+  "enable-blink-gen-property-trees@2",
+  "enable-blink-heap-unified-garbage-collection@2",
+  "enable-brotli@2",
+  "enable-gpu-rasterization@3",
+  "enable-layout-ng@2",
+  "enable-oop-rasterization@1",
+  "enable-resource-load-scheduler@1",
+  "enable-webassembly-threads@1",
+  "enable-webrtc-new-encode-cpu-load-estimator@1",
+  "enable-zero-copy@1",
+  "expensive-background-timer-throttling@2",
+  "ignore-gpu-blacklist",
+  "network-service-in-process@1",
+  "network-service@1",
+  "overlay-strategies@2",
+  "enable-native-gpu-memory-buffers",
+  "disable-gpu-driver-bug-workarounds"
+]

@@ -1,8 +1,10 @@
 ﻿using CefSharp;
 using CefSharp.WinForms;
+using Panacea.Core;
 using Panacea.Modularity.WebBrowsing;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -10,6 +12,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Forms.Integration;
+using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 
 namespace Panacea.Modules.Chromium
@@ -32,11 +35,13 @@ namespace Panacea.Modules.Chromium
         public event EventHandler Close;
         public event EventHandler<bool> IsBusyChanged;
         private WindowsFormsHost wfh;
+        private readonly ILogger _logger;
 
         public ChromiumWebBrowser Browser { get; set; }
         Form _form;
-        public ChromiumWebView(string url)
+        public ChromiumWebView(string url, ILogger logger)
         {
+            _logger = logger;
             Browser = new ChromiumWebBrowser(url)
             {
                 Dock = DockStyle.Fill
@@ -68,8 +73,21 @@ namespace Panacea.Modules.Chromium
 
         private void Browser_ConsoleMessage(object sender, ConsoleMessageEventArgs e)
         {
-            //if (e.Level == LogSeverity.Error)
-            //    _logger.Error(this, $"{e.Message}");
+            switch (e.Level)
+            {
+                case LogSeverity.Error:
+                    _logger.Error(this, $"{e.Message}");
+                    break;
+                case LogSeverity.Info:
+                    _logger.Info(this, $"{e.Message}");
+                    break;
+                case LogSeverity.Warning:
+                    _logger.Warn(this, $"{e.Message}");
+                    break;
+                default:
+                    _logger.Debug(this, $"{e.Message}");
+                    break;
+            }
         }
 
         private void Browser_FrameLoadEnd1(object sender, FrameLoadEndEventArgs e)
@@ -319,9 +337,29 @@ namespace Panacea.Modules.Chromium
         public event EventHandler<bool> FullscreenChanged;
         public event EventHandler DocumentLoaded;
 
-        public void CreateThumbnail()
+        public BitmapImage CreateThumbnail()
         {
+            try
+            {
 
+                using (var bmp = ControlSnapshot.Snapshot(_form))
+                {
+                    var ms = new MemoryStream();
+                    bmp.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
+                    bmp.Save(@"C:\Users\Giannis\Desktop\chromium.png", System.Drawing.Imaging.ImageFormat.Png);
+                    var bi = new BitmapImage();
+                    bi.BeginInit();
+                    bi.StreamSource = ms;
+                    bi.EndInit();
+                    bi.Freeze();
+                    return  bi;
+                }
+
+            }
+            catch 
+            {
+                return null;
+            }
         }
 
         public new bool Focus()

@@ -1,4 +1,5 @@
-﻿using Panacea.Modularity.WebBrowsing;
+﻿using Panacea.Core;
+using Panacea.Modularity.WebBrowsing;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +10,11 @@ namespace Panacea.Modules.Chromium
 {
     public class ChromiumPlugin : IWebViewPlugin
     {
+        public ChromiumPlugin(PanaceaServices core)
+        {
+            _core = core;
+        }
+
         public Task BeginInit()
         {
             return Task.CompletedTask;
@@ -24,11 +30,13 @@ namespace Panacea.Modules.Chromium
             return Task.CompletedTask;
         }
         IWebViewManager _manager;
+        private readonly PanaceaServices _core;
+
         public Task<IWebViewManager> GetWebViewManagerAsync()
         {
             if(_manager == null)
             {
-                _manager = new ChromiumManager();
+                _manager = new ChromiumManager(_core.Logger);
             }
             return Task.FromResult(_manager);
         }

@@ -1,6 +1,8 @@
 ﻿using CefSharp;
 using CefSharp.WinForms;
+using Panacea.Core;
 using Panacea.Modularity.WebBrowsing;
+using ServiceStack.Text;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -13,6 +15,11 @@ namespace Panacea.Modules.Chromium
 {
     public class ChromiumManager : IWebViewManager
     {
+        public ChromiumManager(ILogger logger)
+        {
+            _logger = logger;
+        }
+
         public Task ClearCookies()
         {
             Cef.GetGlobalCookieManager().VisitAllCookies(new CookieVisitor());
@@ -23,10 +30,12 @@ namespace Panacea.Modules.Chromium
         {
             Initialize();
             if (url == null) url = "about:blank";
-            return new ChromiumWebView(url);
+            return new ChromiumWebView(url, _logger);
         }
 
         bool _initialized;
+        private readonly ILogger _logger;
+
         void Initialize()
         {
             if (_initialized) return;
@@ -43,6 +52,7 @@ namespace Panacea.Modules.Chromium
             {
                 CachePath = Path.Combine(pluginPath, "cache"),
                 ResourcesDirPath = pluginPath,
+                
                 LocalesDirPath = Path.Combine(pluginPath, "locales"),
                 UserDataPath = Path.Combine(pluginPath, "User Data"),
                 BrowserSubprocessPath = Path.Combine(pluginPath, "CefSharp.BrowserSubprocess.exe"),
@@ -57,32 +67,37 @@ namespace Panacea.Modules.Chromium
 
             CefSharpSettings.FocusedNodeChangedEnabled = true;
             CefSharpSettings.SubprocessExitIfParentProcessClosed = true;
-
-            //CefSharpSettings.WcfTimeout = new TimeSpan(0,0,0,0,50);
-            //settings.CefCommandLineArgs.Add("touch-events", "enabled");
-            //settings.CefCommandLineArgs.Add("enable-pinch", "");
-
-            //settings.CefCommandLineArgs.Add("--enable-npapi", "1");
+            CefSharpSettings.WcfEnabled = false;
+            CefSharpSettings.WcfTimeout = new TimeSpan(0);
+            settings.CefCommandLineArgs.Add("--touch-events", "enabled");
+            settings.CefCommandLineArgs.Add("--enable-pinch", "");
             settings.CefCommandLineArgs.Add("--ppapi-flash-path", Path.Combine(pluginPath, "PepperFlash", "pepflashplayer.dll")); //Load a specific pepper flash version (Step 1 of 2)
             settings.CefCommandLineArgs.Add("--ppapi-flash-version", "32.0.0.142");
             settings.CefCommandLineArgs.Add("--enable-ephemeral-flash-permission", "0");
             settings.CefCommandLineArgs.Add("--plugin-policy", "allow");
             settings.CefCommandLineArgs.Add("--disable-smart-virtual-keyboard", "1");
             settings.CefCommandLineArgs.Add("--disable-virtual-keyboard", "1");
-            settings.CefCommandLineArgs.Add("enable-media-stream", "1");
-            //settings.CefCommandLineArgs.Add("--ignore-certificate-errors", "1");
-            //settings.CefCommandLineArgs.Add("--kiosk", "1");
-            //settings.CefCommandLineArgs.Add("--kiosk-noprint", "1");
-            //settings.FocusedNodeChangedEnabled = true;
+            settings.CefCommandLineArgs.Add("--enable-media-stream", "1");
+            settings.CefCommandLineArgs.Add("disable-gpu", "disable-gpu");
 
-            //settings.WindowlessFrameRate = 60;
-            // Disable Surfaces so internal PDF viewer works for OSR
-            // https://bitbucket.org/chromiumembedded/cef/issues/1689
-            //settings.CefCommandLineArgs.Add("disable-surfaces", "1");
+            using (var reader = new StreamReader(Path.Combine(new DirectoryInfo(pluginPath).FullName, "settings.json")))
+            {
+                var lst = JsonSerializer.DeserializeFromString<List<string>>(reader.ReadToEnd());
+                foreach (var line in lst)
+                {
+                    var parts = line.Split('@');
+                    if (parts.Length == 1)
+                    {
+                        settings.CefCommandLineArgs.Add(line, "");
+                    }
+                    else if (parts.Length == 2)
+                    {
+                        settings.CefCommandLineArgs.Add(parts[0], parts[1]);
+                    }
+                }
+            }
 
-            //settings.SetOffScreenRenderingBestPerformanceArgs();
-
-            Cef.RegisterWidevineCdm(pluginPath + @"Widevine", new Callback());
+            Cef.RegisterWidevineCdm(Path.Combine(pluginPath, @"Widevine"), new Callback());
             if (!Cef.Initialize(settings))
             {
                 throw new Exception("Unable to Initialize Cef");
