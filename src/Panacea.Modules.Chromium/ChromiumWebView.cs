@@ -36,7 +36,7 @@ namespace Panacea.Modules.Chromium
         public event EventHandler<bool> IsBusyChanged;
         private WindowsFormsHost wfh;
         private readonly ILogger _logger;
-
+        public Window LastWindow { get; private set; }
         public ChromiumWebBrowser Browser { get; set; }
         Form _form;
         public ChromiumWebView(string url, ILogger logger)
@@ -65,10 +65,24 @@ namespace Panacea.Modules.Chromium
             Browser.FrameLoadStart += Browser_FrameLoadStart;
             Browser.FrameLoadEnd += Browser_FrameLoadEnd1;
             Browser.ConsoleMessage += Browser_ConsoleMessage;
-
+            this.IsVisibleChanged += ChromiumWebView_IsVisibleChanged;
+            Loaded += ChromiumWebView_Loaded;
             //Browser.Load(url);
             _initialUrl = url;
             if (url == "about:blank") Url = url;
+        }
+
+        private void ChromiumWebView_Loaded(object sender, RoutedEventArgs e)
+        {
+            LastWindow = Window.GetWindow(this);
+        }
+
+        private void ChromiumWebView_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if ((bool)e.NewValue == false)
+            {
+                Hax.FixTouch(this);
+            }
         }
 
         private void Browser_ConsoleMessage(object sender, ConsoleMessageEventArgs e)
@@ -352,11 +366,11 @@ namespace Panacea.Modules.Chromium
                     bi.StreamSource = ms;
                     bi.EndInit();
                     bi.Freeze();
-                    return  bi;
+                    return bi;
                 }
 
             }
-            catch 
+            catch
             {
                 return null;
             }
@@ -762,5 +776,9 @@ namespace Panacea.Modules.Chromium
         {
         }
 
+        public void OnLoadingProgressChange(IWebBrowser chromiumWebBrowser, IBrowser browser, double progress)
+        {
+            
+        }
     }
 }
