@@ -4,6 +4,7 @@ using Panacea.Core;
 using Panacea.Modularity.WebBrowsing;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
@@ -47,7 +48,7 @@ namespace Panacea.Modules.Chromium
                 Dock = DockStyle.Fill
             };
             wfh = new WindowsFormsHost();
-            _form = new Form() { TopLevel = false, FormBorderStyle = FormBorderStyle.None, ShowInTaskbar = false, Dock = DockStyle.Fill };
+            _form = new CefForm(Browser) { TopLevel = false, FormBorderStyle = FormBorderStyle.None, ShowInTaskbar = false, Dock = DockStyle.Fill };
             _form.Controls.Add(Browser);
             wfh.Child = _form;
             Content = wfh;
@@ -66,31 +67,17 @@ namespace Panacea.Modules.Chromium
             Browser.FrameLoadEnd += Browser_FrameLoadEnd1;
             Browser.ConsoleMessage += Browser_ConsoleMessage;
             this.IsVisibleChanged += ChromiumWebView_IsVisibleChanged;
-
-            Unloaded += ChromiumWebView_Unloaded;
             Loaded += ChromiumWebView_Loaded;
             //Browser.Load(url);
             _initialUrl = url;
             if (url == "about:blank") Url = url;
         }
 
-        private void ChromiumWebView_Unloaded(object sender, RoutedEventArgs e)
-        {
-            LastWindow.PreviewMouseDown -= LastWindow_PreviewMouseDown;
-        }
-
         private void ChromiumWebView_Loaded(object sender, RoutedEventArgs e)
         {
             LastWindow = Window.GetWindow(this);
-            LastWindow.PreviewMouseDown -= LastWindow_PreviewMouseDown;
-            LastWindow.PreviewMouseDown += LastWindow_PreviewMouseDown;
         }
-
-        private void LastWindow_PreviewMouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
-        {
-            Browser.Focus();
-        }
-
+        
         private void ChromiumWebView_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             if ((bool)e.NewValue == false)
@@ -128,8 +115,7 @@ namespace Panacea.Modules.Chromium
                 {
                     if (_disposed) return;
                     DocumentLoaded?.Invoke(this, EventArgs.Empty);
-                    await Task.Delay(30);
-                    Browser.Focus();
+                    
                 }));
 
             }
@@ -757,7 +743,7 @@ namespace Panacea.Modules.Chromium
             Browser.ExecuteScriptAsync("window.print = function(){}");
             Dispatcher.BeginInvoke(new Action(() =>
             {
-                Browser.Focus();
+                
                 if (_disposed) return;
                 UpdateBackForward();
             }), DispatcherPriority.Background);
