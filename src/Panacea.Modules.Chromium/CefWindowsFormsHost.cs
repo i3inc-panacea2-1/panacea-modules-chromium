@@ -17,7 +17,7 @@ namespace Panacea.Modules.Chromium
 
         protected override IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
         {
-            WmTouchDevice.MessageTouchDevice.WndProc(System.Windows.Window.GetWindow(this), msg, wParam, lParam, ref handled);
+            //WmTouchDevice.MessageTouchDevice.WndProc(System.Windows.Window.GetWindow(this), msg, wParam, lParam, ref handled);
             return base.WndProc(hwnd, msg, wParam, lParam, ref handled);
         }
     }

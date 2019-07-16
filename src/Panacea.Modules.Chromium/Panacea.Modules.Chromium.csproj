@@ -57,9 +57,6 @@
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="WindowsFormsIntegration" />
-    <Reference Include="WmTouchDevice">
-      <HintPath>..\..\..\..\..\Repositories\Internal\Dotnet\PanaceaV2Client\User Plugins\WebBrowserChromiumEngine\WmTouchDevice.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CefForm.cs">
