@@ -80,6 +80,8 @@ namespace Panacea.Modules.Chromium
             settings.CefCommandLineArgs.Add("--enable-media-stream", "1");
             settings.CefCommandLineArgs.Add("disable-gpu", "disable-gpu");
 
+            settings.CefCommandLineArgs.Add("--ignore-certificate-errors", "1");
+
             using (var reader = new StreamReader(Path.Combine(new DirectoryInfo(pluginPath).FullName, "settings.json")))
             {
                 var lst = JsonSerializer.DeserializeFromString<List<string>>(reader.ReadToEnd());
