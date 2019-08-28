@@ -2,6 +2,7 @@
 using Panacea.Modularity.WebBrowsing;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,7 +18,18 @@ namespace Panacea.Modules.Chromium
 
         public Task BeginInit()
         {
+            _core.UserService.UserLoggedOut += UserService_UserLoggedOut;
             return Task.CompletedTask;
+        }
+
+        private async Task UserService_UserLoggedOut(IUser user)
+        {
+            try
+            {
+                var manager = await GetWebViewManagerAsync();
+                await manager.ClearCookies();
+            }
+            catch { }
         }
 
         public void Dispose()
@@ -25,9 +37,18 @@ namespace Panacea.Modules.Chromium
             
         }
 
-        public Task EndInit()
+        public async Task EndInit()
         {
-            return Task.CompletedTask;
+            if (!Debugger.IsAttached)
+            {
+                try
+                {
+                    var manager =(ChromiumManager) await GetWebViewManagerAsync();
+                    manager.Initialize();
+                    await manager.ClearCookies();
+                }
+                catch { }
+            }
         }
         IWebViewManager _manager;
         private readonly PanaceaServices _core;

@@ -36,7 +36,7 @@ namespace Panacea.Modules.Chromium
         bool _initialized;
         private readonly ILogger _logger;
 
-        void Initialize()
+        public void Initialize()
         {
             if (_initialized) return;
             _initialized = true;
@@ -60,7 +60,7 @@ namespace Panacea.Modules.Chromium
                 WindowlessRenderingEnabled = false,
                 PersistSessionCookies = true,
                 LogSeverity = LogSeverity.Disable,
-
+                PersistUserPreferences = true
                 //FocusedNodeChangedEnabled = true
 
             };
@@ -79,7 +79,6 @@ namespace Panacea.Modules.Chromium
             //settings.CefCommandLineArgs.Add("--disable-virtual-keyboard", "1");
             settings.CefCommandLineArgs.Add("--enable-media-stream", "1");
             settings.CefCommandLineArgs.Add("disable-gpu", "disable-gpu");
-
             settings.CefCommandLineArgs.Add("--ignore-certificate-errors", "1");
 
             using (var reader = new StreamReader(Path.Combine(new DirectoryInfo(pluginPath).FullName, "settings.json")))
@@ -104,6 +103,7 @@ namespace Panacea.Modules.Chromium
             {
                 throw new Exception("Unable to Initialize Cef");
             }
+            Cef.GetGlobalCookieManager().SetStoragePath(Path.Combine(pluginPath, "cookies"), true);
 
         }
     }
