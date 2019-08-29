@@ -1,4 +1,6 @@
 ﻿using CefSharp;
+using CefSharp.Callback;
+using CefSharp.Handler;
 using CefSharp.WinForms;
 using Panacea.Core;
 using Panacea.Modularity.WebBrowsing;
@@ -47,6 +49,7 @@ namespace Panacea.Modules.Chromium
             {
                 Dock = DockStyle.Fill
             };
+           
             wfh = new WindowsFormsHost();
             _form = new CefForm(Browser) { TopLevel = false, FormBorderStyle = FormBorderStyle.None, ShowInTaskbar = false, Dock = DockStyle.Fill };
             _form.Controls.Add(Browser);
@@ -61,11 +64,13 @@ namespace Panacea.Modules.Chromium
             Browser.DisplayHandler = this;
             Browser.DialogHandler = this;
             Browser.MenuHandler = this;
+            
             Browser.LoadingStateChanged += ChromiumBrowserHost_LoadingStateChanged;
             Browser.LoadError += Browser_LoadError;
             Browser.FrameLoadStart += Browser_FrameLoadStart;
             Browser.FrameLoadEnd += Browser_FrameLoadEnd1;
             Browser.ConsoleMessage += Browser_ConsoleMessage;
+
             this.IsVisibleChanged += ChromiumWebView_IsVisibleChanged;
             Loaded += ChromiumWebView_Loaded;
             //Browser.Load(url);
@@ -465,17 +470,7 @@ namespace Panacea.Modules.Chromium
 
         }
 
-        public CefReturnValue OnBeforeResourceLoad(IWebBrowser browserControl, IBrowser browser, IFrame frame, IRequest request, IRequestCallback callback)
-        {
-            return CefReturnValue.Continue;
-
-
-        }
-
-        public bool GetAuthCredentials(IWebBrowser browserControl, IBrowser browser, IFrame frame, bool isProxy, string host, int port, string realm, string scheme, IAuthCallback callback)
-        {
-            return false;
-        }
+       
 
         public void OnRenderProcessTerminated(IWebBrowser browserControl, IBrowser browser, CefTerminationStatus status)
         {
@@ -740,7 +735,7 @@ namespace Panacea.Modules.Chromium
         {
             if (_disposed) return false;
             HasInvalidCertificate = false;
-            Browser.ExecuteScriptAsync("window.print = function(){}");
+            //Browser.ExecuteScriptAsync("window.print = function(){}");
             Dispatcher.BeginInvoke(new Action(() =>
             {
                 
@@ -780,5 +775,17 @@ namespace Panacea.Modules.Chromium
         {
             
         }
+
+        public IResourceRequestHandler GetResourceRequestHandler(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, IRequest request, bool isNavigation, bool isDownload, string requestInitiator, ref bool disableDefaultHandling)
+        {
+            return new ResourceRequestHandler();
+        }
+
+        public bool GetAuthCredentials(IWebBrowser chromiumWebBrowser, IBrowser browser, string originUrl, bool isProxy, string host, int port, string realm, string scheme, IAuthCallback callback)
+        {
+            return true;
+        }
     }
+
+
 }

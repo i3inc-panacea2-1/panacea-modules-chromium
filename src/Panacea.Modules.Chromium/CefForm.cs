@@ -19,9 +19,9 @@ namespace Panacea.Modules.Chromium
 
 
         bool _initialized;
-        private void _br_IsBrowserInitializedChanged(object sender, CefSharp.IsBrowserInitializedChangedEventArgs e)
+        private void _br_IsBrowserInitializedChanged(object sender, EventArgs e)
         {
-            _initialized = e.IsBrowserInitialized;
+            _initialized = true;
         }
 
         public static short HIWORD(int a)

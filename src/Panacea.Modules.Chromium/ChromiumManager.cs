@@ -42,12 +42,7 @@ namespace Panacea.Modules.Chromium
             _initialized = true;
             Cef.EnableHighDPISupport();
             var pluginPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            try
-            {
-                Directory.Delete(Path.Combine(pluginPath, "cache"), true);
-                Directory.CreateDirectory(Path.Combine(pluginPath, "cache"));
-            }
-            catch { }
+            
             var settings = new CefSettings
             {
                 CachePath = Path.Combine(pluginPath, "cache"),
@@ -71,15 +66,15 @@ namespace Panacea.Modules.Chromium
             CefSharpSettings.WcfTimeout = new TimeSpan(0);
             //settings.CefCommandLineArgs.Add("--touch-events", "enabled");
             //settings.CefCommandLineArgs.Add("--enable-pinch", "");
-            settings.CefCommandLineArgs.Add("--ppapi-flash-path", Path.Combine(pluginPath, "PepperFlash", "pepflashplayer.dll")); //Load a specific pepper flash version (Step 1 of 2)
-            settings.CefCommandLineArgs.Add("--ppapi-flash-version", "32.0.0.142");
+            settings.CefCommandLineArgs.Add("--ppapi-flash-path", Path.Combine(pluginPath, "PepperFlash", Environment.Is64BitProcess ? "x64" : "x86", "pepflashplayer.dll")); //Load a specific pepper flash version (Step 1 of 2)
+            settings.CefCommandLineArgs.Add("--ppapi-flash-version", "32.0.0.238");
             settings.CefCommandLineArgs.Add("--enable-ephemeral-flash-permission", "0");
             settings.CefCommandLineArgs.Add("--plugin-policy", "allow");
             //settings.CefCommandLineArgs.Add("--disable-smart-virtual-keyboard", "1");
             //settings.CefCommandLineArgs.Add("--disable-virtual-keyboard", "1");
             settings.CefCommandLineArgs.Add("--enable-media-stream", "1");
-            settings.CefCommandLineArgs.Add("disable-gpu", "disable-gpu");
             settings.CefCommandLineArgs.Add("--ignore-certificate-errors", "1");
+            settings.CefCommandLineArgs.Add("enable-experimental-web-platform-features", "enable");
 
             using (var reader = new StreamReader(Path.Combine(new DirectoryInfo(pluginPath).FullName, "settings.json")))
             {
@@ -98,12 +93,13 @@ namespace Panacea.Modules.Chromium
                 }
             }
 
-            Cef.RegisterWidevineCdm(Path.Combine(pluginPath, @"Widevine"), new Callback());
+            Cef.RegisterWidevineCdm(Path.Combine(pluginPath, @"Widevine", Environment.Is64BitProcess ? "x64" : "x86"), new Callback());
+          
             if (!Cef.Initialize(settings))
             {
                 throw new Exception("Unable to Initialize Cef");
             }
-            Cef.GetGlobalCookieManager().SetStoragePath(Path.Combine(pluginPath, "cookies"), true);
+            //Cef.GetGlobalRequestContext(). set SetStoragePath(Path.Combine(pluginPath, "cookies"), true);
 
         }
     }
