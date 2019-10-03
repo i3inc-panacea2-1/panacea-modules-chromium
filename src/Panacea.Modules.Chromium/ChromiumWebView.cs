@@ -389,12 +389,14 @@ namespace Panacea.Modules.Chromium
 
         public void GoBack()
         {
-            Browser.GetBrowser().GoBack();
+            if(Browser.CanGoBack)
+                Browser.GetBrowser().GoBack();
         }
 
         public void GoForward()
         {
-            Browser.GetBrowser().GoForward();
+            if(Browser.CanGoForward)
+                Browser.GetBrowser().GoForward();
         }
 
         public void Navigate(string url)
