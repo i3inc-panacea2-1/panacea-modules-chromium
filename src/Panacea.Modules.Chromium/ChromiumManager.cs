@@ -15,9 +15,10 @@ namespace Panacea.Modules.Chromium
 {
     public class ChromiumManager : IWebViewManager
     {
-        public ChromiumManager(ILogger logger)
+        public ChromiumManager(Dictionary<string, string> args, ILogger logger)
         {
             _logger = logger;
+            _args = args;
         }
 
         public Task ClearCookies()
@@ -35,6 +36,7 @@ namespace Panacea.Modules.Chromium
 
         bool _initialized;
         private readonly ILogger _logger;
+        private readonly Dictionary<string, string> _args;
 
         public void Initialize()
         {
@@ -42,12 +44,12 @@ namespace Panacea.Modules.Chromium
             _initialized = true;
             Cef.EnableHighDPISupport();
             var pluginPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            
+
             var settings = new CefSettings
             {
                 CachePath = Path.Combine(pluginPath, "cache"),
                 ResourcesDirPath = pluginPath,
-                
+
                 LocalesDirPath = Path.Combine(pluginPath, "locales"),
                 UserDataPath = Path.Combine(pluginPath, "User Data"),
                 BrowserSubprocessPath = Path.Combine(pluginPath, "CefSharp.BrowserSubprocess.exe"),
@@ -76,25 +78,23 @@ namespace Panacea.Modules.Chromium
             //settings.CefCommandLineArgs.Add("--ignore-certificate-errors", "1");
             settings.CefCommandLineArgs.Add("enable-experimental-web-platform-features", "1");
             settings.CefCommandLineArgs.Add("disable-web-security", "disable-web-security");
-            using (var reader = new StreamReader(Path.Combine(new DirectoryInfo(pluginPath).FullName, "settings.json")))
+
+            foreach (var kp in _args)
             {
-                var lst = JsonSerializer.DeserializeFromString<List<string>>(reader.ReadToEnd());
-                foreach (var line in lst)
+
+                if (kp.Value == null)
                 {
-                    var parts = line.Split('@');
-                    if (parts.Length == 1)
-                    {
-                        settings.CefCommandLineArgs.Add(line, "");
-                    }
-                    else if (parts.Length == 2)
-                    {
-                        settings.CefCommandLineArgs.Add(parts[0], parts[1]);
-                    }
+                    settings.CefCommandLineArgs.Add(kp.Key, "");
+                }
+                else
+                {
+                    settings.CefCommandLineArgs.Add(kp.Key, kp.Value);
                 }
             }
 
+
             Cef.RegisterWidevineCdm(Path.Combine(pluginPath, @"Widevine", Environment.Is64BitProcess ? "x64" : "x86"), new Callback());
-          
+
             if (!Cef.Initialize(settings))
             {
                 throw new Exception("Unable to Initialize Cef");

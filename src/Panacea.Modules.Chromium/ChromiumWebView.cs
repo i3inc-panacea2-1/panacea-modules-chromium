@@ -49,7 +49,7 @@ namespace Panacea.Modules.Chromium
             {
                 Dock = DockStyle.Fill
             };
-           
+
             wfh = new WindowsFormsHost();
             _form = new CefForm(Browser) { TopLevel = false, FormBorderStyle = FormBorderStyle.None, ShowInTaskbar = false, Dock = DockStyle.Fill };
             _form.Controls.Add(Browser);
@@ -64,7 +64,7 @@ namespace Panacea.Modules.Chromium
             Browser.DisplayHandler = this;
             Browser.DialogHandler = this;
             Browser.MenuHandler = this;
-            
+
             Browser.LoadingStateChanged += ChromiumBrowserHost_LoadingStateChanged;
             Browser.LoadError += Browser_LoadError;
             Browser.FrameLoadStart += Browser_FrameLoadStart;
@@ -73,6 +73,12 @@ namespace Panacea.Modules.Chromium
 
             this.IsVisibleChanged += ChromiumWebView_IsVisibleChanged;
             Loaded += ChromiumWebView_Loaded;
+
+            Browser.ExecuteScriptAsyncWhenPageLoaded(@"
+                window.print = function(){};
+                navigator.permissions.query = function() { return Promise.resolve({state:'granted'});};", 
+                false);
+
             //Browser.Load(url);
             _initialUrl = url;
             if (url == "about:blank") Url = url;
@@ -82,7 +88,7 @@ namespace Panacea.Modules.Chromium
         {
             LastWindow = Window.GetWindow(this);
         }
-        
+
         private void ChromiumWebView_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             if ((bool)e.NewValue == false)
@@ -114,13 +120,11 @@ namespace Panacea.Modules.Chromium
         {
             if (e.Frame.IsMain)
             {
-
-                //e.Frame.ExecuteJavaScriptAsync("window.print=function(){}");
                 Dispatcher.BeginInvoke(new Action(async () =>
                 {
                     if (_disposed) return;
                     DocumentLoaded?.Invoke(this, EventArgs.Empty);
-                    
+
                 }));
 
             }
@@ -227,7 +231,6 @@ namespace Panacea.Modules.Chromium
             Dispatcher.BeginInvoke(new Action(() =>
             {
                 if (_disposed) return;
-                //Browser.ExecuteScriptAsync("window.print = function(){}");
                 UpdateBackForward();
             }));
         }
@@ -389,13 +392,13 @@ namespace Panacea.Modules.Chromium
 
         public void GoBack()
         {
-            if(Browser.CanGoBack)
+            if (Browser.CanGoBack)
                 Browser.GetBrowser().GoBack();
         }
 
         public void GoForward()
         {
-            if(Browser.CanGoForward)
+            if (Browser.CanGoForward)
                 Browser.GetBrowser().GoForward();
         }
 
@@ -472,7 +475,7 @@ namespace Panacea.Modules.Chromium
 
         }
 
-       
+
 
         public void OnRenderProcessTerminated(IWebBrowser browserControl, IBrowser browser, CefTerminationStatus status)
         {
@@ -737,10 +740,9 @@ namespace Panacea.Modules.Chromium
         {
             if (_disposed) return false;
             HasInvalidCertificate = false;
-            //Browser.ExecuteScriptAsync("window.print = function(){}");
             Dispatcher.BeginInvoke(new Action(() =>
             {
-                
+
                 if (_disposed) return;
                 UpdateBackForward();
             }), DispatcherPriority.Background);
@@ -775,7 +777,7 @@ namespace Panacea.Modules.Chromium
 
         public void OnLoadingProgressChange(IWebBrowser chromiumWebBrowser, IBrowser browser, double progress)
         {
-            
+
         }
 
         public IResourceRequestHandler GetResourceRequestHandler(IWebBrowser chromiumWebBrowser, IBrowser browser, IFrame frame, IRequest request, bool isNavigation, bool isDownload, string requestInitiator, ref bool disableDefaultHandling)
