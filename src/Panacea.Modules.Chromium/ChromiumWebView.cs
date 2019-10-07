@@ -74,10 +74,7 @@ namespace Panacea.Modules.Chromium
             this.IsVisibleChanged += ChromiumWebView_IsVisibleChanged;
             Loaded += ChromiumWebView_Loaded;
 
-            Browser.ExecuteScriptAsyncWhenPageLoaded(@"
-                window.print = function(){};
-                navigator.permissions.query = function() { return Promise.resolve({state:'granted'});};", 
-                false);
+            
 
             //Browser.Load(url);
             _initialUrl = url;
@@ -257,7 +254,18 @@ namespace Panacea.Modules.Chromium
 
         private void ChromiumBrowserHost_LoadingStateChanged(object sender, LoadingStateChangedEventArgs e)
         {
-
+            try
+            {
+                if (!e.IsLoading && Browser.CanExecuteJavascriptInMainFrame)
+                {
+                    Browser.ExecuteScriptAsync(@"
+                window.print = function(){};
+                navigator.permissions.query = function() { return Promise.resolve({state:'granted'});};",
+                    false);
+                }
+            }
+            catch { }
+            
             Dispatcher.BeginInvoke(new Action(() =>
             {
                 if (_disposed) return;
