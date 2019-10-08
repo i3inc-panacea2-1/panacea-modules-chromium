@@ -552,10 +552,16 @@ namespace Panacea.Modules.Chromium
                                 ElementLostFocus?.Invoke(this, null);
                                 return;
                             }
+                            ElementFocus?.Invoke(this, "text");
                         }
-                        await Task.Delay(200);
-
+                    }
+                    else if (node.HasAttribute("contenteditable"))
+                    {
                         ElementFocus?.Invoke(this, "text");
+                    }
+                    else
+                    {
+                        ElementLostFocus?.Invoke(this, null);
                     }
                 }
             }));
