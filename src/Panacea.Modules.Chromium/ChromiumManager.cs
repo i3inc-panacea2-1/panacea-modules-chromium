@@ -44,15 +44,15 @@ namespace Panacea.Modules.Chromium
             _initialized = true;
             Cef.EnableHighDPISupport();
             var pluginPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-
+            var chromiumPath = Path.Combine(pluginPath, "Chromium", Environment.Is64BitProcess ? "x64" : "x86");
             var settings = new CefSettings
             {
                 CachePath = Path.Combine(pluginPath, "cache"),
-                ResourcesDirPath = pluginPath,
+                ResourcesDirPath = chromiumPath,
 
-                LocalesDirPath = Path.Combine(pluginPath, "locales"),
+                LocalesDirPath = Path.Combine(chromiumPath, "locales"),
                 UserDataPath = Path.Combine(pluginPath, "User Data"),
-                BrowserSubprocessPath = Path.Combine(pluginPath, "CefSharp.BrowserSubprocess.exe"),
+                BrowserSubprocessPath = Path.Combine(chromiumPath, "CefSharp.BrowserSubprocess.exe"),
                 MultiThreadedMessageLoop = true,
                 WindowlessRenderingEnabled = false,
                 PersistSessionCookies = true,

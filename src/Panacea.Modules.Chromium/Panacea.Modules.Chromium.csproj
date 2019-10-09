@@ -64,6 +64,7 @@
     <Reference Include="WindowsFormsIntegration" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BrowserProcessHandler.cs" />
     <Compile Include="CefForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -95,9 +96,6 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
-    <Content Include="settings.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="CefSharp.WinForms">
@@ -131,7 +129,9 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>echo xcopy $(TargetDir)Chromium\$(Platform) $(TargetDir) /S /I /Q /Y /F
-xcopy $(TargetDir)Chromium\$(Platform) $(TargetDir) /S /I /Q /Y /F
-DEL /F/Q/S $(TargetDir)Chromium\$(Platform)</PostBuildEvent>
+echo xcopy $(TargetDir)Chromium\$(Platform) $(TargetDir) /S /I /Q /Y /F
+DEL lib*.dll *.pak *.bin *.dat chrome*.dll d3d*.dll readme.txt
+
+move CefSharp* Chromium\$(Platform)</PostBuildEvent>
   </PropertyGroup>
 </Project>
