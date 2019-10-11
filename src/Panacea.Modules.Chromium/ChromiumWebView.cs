@@ -74,7 +74,7 @@ namespace Panacea.Modules.Chromium
             this.IsVisibleChanged += ChromiumWebView_IsVisibleChanged;
             Loaded += ChromiumWebView_Loaded;
 
-            
+
 
             //Browser.Load(url);
             _initialUrl = url;
@@ -265,7 +265,7 @@ namespace Panacea.Modules.Chromium
                 }
             }
             catch { }
-            
+
             Dispatcher.BeginInvoke(new Action(() =>
             {
                 if (_disposed) return;
@@ -659,8 +659,31 @@ namespace Panacea.Modules.Chromium
         {
             Dispatcher.BeginInvoke(new Action(() =>
             {
-                Title = titleChangedArgs.Title;
-                TitleChanged?.Invoke(this, titleChangedArgs.Title);
+                if (!string.IsNullOrEmpty(Url))
+                {
+                   
+                    if (Url.Contains(titleChangedArgs.Title))
+                    {
+                        var title = Url.Split('/').Last();
+                        if (title.Contains("."))
+                        {
+                            Title = string.Join(".", title.Split('.').Take(title.Split('.').Count() - 1));
+                        }
+                        else
+                        {
+                            Title = title;
+                        }
+                    }
+                    else
+                    {
+                        Title = titleChangedArgs.Title;
+                    }
+                }
+                else
+                {
+                    Title = titleChangedArgs.Title;
+                }
+                TitleChanged?.Invoke(this, Title);
             }));
         }
 
