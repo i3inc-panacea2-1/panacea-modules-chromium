@@ -66,8 +66,8 @@ namespace Panacea.Modules.Chromium
             CefSharpSettings.SubprocessExitIfParentProcessClosed = true;
             CefSharpSettings.WcfEnabled = false;
             CefSharpSettings.WcfTimeout = new TimeSpan(0);
-            //settings.CefCommandLineArgs.Add("--touch-events", "enabled");
-            //settings.CefCommandLineArgs.Add("--enable-pinch", "");
+            settings.CefCommandLineArgs.Add("--touch-events", "enabled");
+            settings.CefCommandLineArgs.Add("--enable-pinch", "");
             settings.CefCommandLineArgs.Add("--ppapi-flash-path", Path.Combine(pluginPath, "PepperFlash", Environment.Is64BitProcess ? "x64" : "x86", "pepflashplayer.dll")); //Load a specific pepper flash version (Step 1 of 2)
             settings.CefCommandLineArgs.Add("--ppapi-flash-version", "32.0.0.238");
             settings.CefCommandLineArgs.Add("--enable-ephemeral-flash-permission", "0");
