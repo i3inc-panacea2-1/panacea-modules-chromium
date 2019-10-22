@@ -259,9 +259,11 @@ namespace Panacea.Modules.Chromium
                 if (!e.IsLoading && Browser.CanExecuteJavascriptInMainFrame)
                 {
                     Browser.ExecuteScriptAsync(@"
-                window.print = function(){};
-                navigator.permissions.query = function() { return Promise.resolve({state:'granted'});};",
+               
+                navigator.permissions.query = function() { return Promise.resolve({state:'granted'});};
+ window.print = function(){};",
                     false);
+                    _logger.Debug(this, "Injected web rtc");
                 }
             }
             catch { }
