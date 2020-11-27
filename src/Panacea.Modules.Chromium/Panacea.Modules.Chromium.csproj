@@ -99,7 +99,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="CefSharp.WinForms">
-      <Version>75.1.141</Version>
+      <Version>86.0.241</Version>
     </PackageReference>
     <PackageReference Include="Chromium.Binaries">
       <Version>75.0.3770.100</Version>
